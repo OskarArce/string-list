@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import { LayoutContext, ListContext } from "./Contexts";
+import StringList from "./components/StringList";
+import StringForm from "./components/StringForm";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [openForm, setOpenForm] = useState(false);
+  const [list, setList] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [selected, setSelected] = useState([]);
+
+  const addItem = (text) => {
+    if (!text) return;
+    setHistory([...history, list]);
+    setList([...list, text]);
+  };
+
+  const deleteItem = (indexes) => {
+    const deleteIndexes = indexes ?? selected;
+    setHistory([...history, list]);
+    setList(list.filter((_element, index) => !deleteIndexes.includes(index)));
+    setSelected(selected.filter((index) => !deleteIndexes.includes(index)));
+  };
+
+  const selectItem = (index) => {
+    if (list.length < index) return;
+    const selectedIndex = selected.indexOf(index);
+    if (selectedIndex === -1) setSelected([...selected, index]);
+    else setSelected(selected.toSpliced(selectedIndex, 1));
+  };
+
+  const undo = () => {
+    if (history.length > 0) setList(history.pop());
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <LayoutContext.Provider value={{ openForm, setOpenForm }}>
+      <ListContext.Provider
+        value={{
+          list,
+          history,
+          selected,
+          addItem,
+          deleteItem,
+          selectItem,
+          undo,
+        }}
+      >
+        {openForm ? <StringForm /> : <StringList />}
+      </ListContext.Provider>
+    </LayoutContext.Provider>
+  );
 }
 
-export default App
+export default App;

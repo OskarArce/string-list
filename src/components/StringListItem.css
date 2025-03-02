@@ -1,0 +1,8 @@
+.string-list-item {
+  padding: 9px 15px;
+}
+
+.string-list-item.selected {
+  color: #ffffff;
+  background-color: #324bff;
+}
